@@ -5,39 +5,66 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     Rigidbody rb;
-    public float movementSpeed = 100.0f;
+    [SerializeField]
+    private float movementSpeed;
 
 
-    bool moveRight, moveLeft = false;
+    bool moveRight, moveLeft, moved = false;
 
     //VARAIBLES FOR CUSTOM DRAG
     [SerializeField]
-    float dragAmount = 1.0f;
+    private float dragAmount;
+
+
+    //vars for rows
+    public float left = -5.0f;
+    public float center = 0f;
+    public float right = 5.0f;
 
 
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+
+        //varaible init
+        movementSpeed = 500.0f;
+        dragAmount = 3.0f;
+
     }
 
     // Update is called once per frame
     void Update()
     {
         //horizontal = Input.GetAxis("Horizontal");
-        
+
         //transform.Translate(new Vector3(horizontal, 0.0f, 0.0f) * movementSpeed * Time.deltaTime);
+        if (rb.velocity.x == 0)
+
+        {
+            moved = false;
+        }
 
         //trying out impluse forces based on input direction
-        if(Input.GetKeyUp(KeyCode.RightArrow) && !moveRight)
+        if (!moveRight && !moveLeft && !moved)
         {
-            moveRight = true;
-        }
+            if (Input.GetKeyUp(KeyCode.RightArrow))
+            {
+                moveRight = true;
+                //moved = true;
+            }
 
-        if (Input.GetKeyUp(KeyCode.LeftArrow) && !moveLeft)
-        {
-            moveLeft = true;
+            if (Input.GetKeyUp(KeyCode.LeftArrow))
+            {
+                moveLeft = true;
+                //moved= true;
+            }
+            moved = true;
+            
         }
+        
+
+        
 
     }
 
@@ -59,6 +86,9 @@ public class PlayerController : MonoBehaviour
             moveLeft = false;
         }
 
+        
+        
+
         Drag();
         
 
@@ -68,8 +98,18 @@ public class PlayerController : MonoBehaviour
     private void Drag()
     {
         float sideVelocity = rb.velocity.x;
-        Vector3 dragForce = new Vector3(-dragAmount * (Mathf.Abs(sideVelocity) > 0.5 ? sideVelocity : 0), 0, 0);
-        rb.AddForce(dragForce, ForceMode.Force);
+        if(Mathf.Abs(sideVelocity) > 1)
+        {
+            Vector3 dragForce = new Vector3(-dragAmount * sideVelocity, 0, 0);
+            rb.AddForce(dragForce, ForceMode.Force);
+        }
+        else
+        {
+            //rb.transform.position = rb.transform.position;
+            rb.velocity = new Vector3(0, rb.velocity.y, rb.velocity.z);
+        }
+        
+        
         Debug.Log("side: " + sideVelocity);
 
         //(Mathf.Abs(sideVelocity) > 1 ? sideVelocity : 0)
